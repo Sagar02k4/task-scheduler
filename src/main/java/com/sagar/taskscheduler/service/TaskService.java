@@ -5,7 +5,10 @@ import com.sagar.taskscheduler.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class TaskService {
@@ -56,6 +59,32 @@ public class TaskService {
             }
         }
         return false;
+    }
+
+    public List<Task> getExecutionOrder(){
+        List<Task> allTasks = taskRepository.findAll();
+        List<Task> sortedOrder = new ArrayList<>();
+        Set<Long> visited = new HashSet<>();
+
+        for(Task task : allTasks){
+            if(!visited.contains(task.getId())){
+                topologicalSortUtil(task, visited, sortedOrder);
+            }
+        }
+
+        return sortedOrder;
+    }
+
+    public void topologicalSortUtil(Task task, Set<Long> visited, List<Task> sortedOrder){
+        visited.add(task.getId());
+
+        for(Task dependency : task.getDependencies()){
+            if(!visited.contains(dependency.getId())){
+                topologicalSortUtil(dependency, visited, sortedOrder);
+            }
+        }
+
+        sortedOrder.add(task);
     }
 
 }

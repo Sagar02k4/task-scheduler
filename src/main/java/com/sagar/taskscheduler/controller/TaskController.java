@@ -38,4 +38,9 @@ public class TaskController {
     public Task addDependency(@PathVariable Long taskId, @PathVariable Long dependsOnId){
         return taskService.addDependency(taskId, dependsOnId);
     }
+
+    @GetMapping("/execution-order")
+    public List<Task> getExecutionOrder(){
+        return taskService.getExecutionOrder();
+    }
 }
