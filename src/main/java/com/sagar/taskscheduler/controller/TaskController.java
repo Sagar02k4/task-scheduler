@@ -33,4 +33,9 @@ public class TaskController {
     public void deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
     }
+
+    @PostMapping("/{taskId}/dependencies/{dependsOnId}")
+    public Task addDependency(@PathVariable Long taskId, @PathVariable Long dependsOnId){
+        return taskService.addDependency(taskId, dependsOnId);
+    }
 }
