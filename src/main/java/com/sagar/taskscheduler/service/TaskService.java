@@ -5,10 +5,7 @@ import com.sagar.taskscheduler.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class TaskService {
@@ -85,6 +82,49 @@ public class TaskService {
         }
 
         sortedOrder.add(task);
+    }
+
+    public List<Task> getPriorityBasedRxrcutionOrder() {
+        List<Task> allTasks = taskRepository.findAll();
+
+        Map<Long, Integer> inDegree = new HashMap<>();
+        Map<Long, List<Task>> dependents = new HashMap<>();
+
+        for(Task task : allTasks){
+            inDegree.put(task.getId(), task.getDependencies().size());
+            dependents.putIfAbsent(task.getId(), new ArrayList<>());
+        }
+
+        for(Task task : allTasks){
+            for(Task dependency : task.getDependencies()){
+                dependents.get(dependency.getId()).add(task);
+            }
+        }
+
+        PriorityQueue<Task> readyQueue = new PriorityQueue<>( (a,b) -> b.getPriority().ordinal() - a.getPriority().ordinal());
+
+        for(Task task : allTasks){
+            if(inDegree.get(task.getId()) == 0){
+                readyQueue.add(task);
+            }
+        }
+
+        List<Task> result = new ArrayList<>();
+
+        while(!readyQueue.isEmpty()){
+            Task current = readyQueue.poll();
+            result.add(current);
+            for(Task dependent : dependents.get(current.getId())){
+                int newInDegree = inDegree.get(dependent.getId()) - 1;
+                inDegree.put(dependent.getId(), newInDegree);
+
+                if(newInDegree == 0){
+                    readyQueue.add(dependent);
+                }
+            }
+        }
+
+        return result;
     }
 
 }
