@@ -1,5 +1,6 @@
 package com.sagar.taskscheduler.controller;
 
+import com.sagar.taskscheduler.model.Status;
 import com.sagar.taskscheduler.model.Task;
 import com.sagar.taskscheduler.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +50,14 @@ public class TaskController {
         return taskService.getPriorityBasedRxrcutionOrder();
     }
 
+
     @GetMapping("/deadline-conflicts")
     public List<String> getDeadlineConflicts(){
         return taskService.detectDeadlineConflict();
+    }
+
+    @PatchMapping("/{id}/status")
+    public Task updateStatus(@PathVariable Long id, @RequestParam Status status){
+        return taskService.updateStatus(id, status);
     }
 }

@@ -1,5 +1,6 @@
 package com.sagar.taskscheduler.service;
 
+import com.sagar.taskscheduler.model.Status;
 import com.sagar.taskscheduler.repository.TaskRepository;
 import com.sagar.taskscheduler.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,6 +162,21 @@ public class TaskService {
             }
         }
         return conflicts;
+    }
+
+    public Task updateStatus(Long taskId, Status newStatus){
+        Task task = getTaskById(taskId);
+
+        if(newStatus == Status.IN_PROGRESS || newStatus == Status.DONE){
+            for(Task dependency : task.getDependencies()){
+                if(dependency.getStatus() != Status.DONE){
+                    throw new RuntimeException("Cannot start this task. Dependency " + dependency.getTitle() + " is not completed yet.");
+                }
+            }
+        }
+
+        task.setStatus(newStatus);
+        return taskRepository.save(task);
     }
 
 }
