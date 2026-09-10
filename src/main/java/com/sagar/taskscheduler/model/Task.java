@@ -19,6 +19,8 @@ public class Task {
 
     private String description;
 
+    private String assignee;
+
     @Enumerated(EnumType.STRING)
     private Priority priority;
 

@@ -48,4 +48,9 @@ public class TaskController {
     public List<Task> getPriorityBasedExecutionOrder(){
         return taskService.getPriorityBasedRxrcutionOrder();
     }
+
+    @GetMapping("/deadline-conflicts")
+    public List<String> getDeadlineConflicts(){
+        return taskService.detectDeadlineConflict();
+    }
 }

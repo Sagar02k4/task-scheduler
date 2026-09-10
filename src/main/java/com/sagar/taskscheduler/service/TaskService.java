@@ -127,4 +127,40 @@ public class TaskService {
         return result;
     }
 
+    public List<String> detectDeadlineConflict(){
+        List<Task> alltasks = taskRepository.findAll();
+        List<String> conflicts = new ArrayList<>();
+        Map<String, List<Task>> tasksbyAssigneeAndDate = new HashMap<>();
+
+        for(Task task : alltasks){
+            if(task.getAssignee() == null || task.getDeadline() == null){
+                continue;
+            }
+            String key = task.getAssignee() + "_" + task.getDeadline();
+            tasksbyAssigneeAndDate.putIfAbsent(key,new ArrayList<>());
+            tasksbyAssigneeAndDate.get(key).add(task);
+        }
+
+        for(Map.Entry<String, List<Task>> entry : tasksbyAssigneeAndDate.entrySet()){
+            List<Task> tasksOnSameDay = entry.getValue();
+
+            if(tasksOnSameDay.size() > 1){
+                StringBuilder message = new StringBuilder();
+                message.append(tasksOnSameDay.get(0).getAssignee())
+                        .append(" has ")
+                        .append(tasksOnSameDay.size())
+                        .append(" tasks due on ")
+                        .append(tasksOnSameDay.get(0).getDeadline())
+                        .append(": ");
+
+                for(Task t : tasksOnSameDay){
+                    message.append(t.getTitle()).append(", ");
+                }
+
+                conflicts.add(message.toString());
+            }
+        }
+        return conflicts;
+    }
+
 }
