@@ -2,6 +2,8 @@ package com.sagar.taskscheduler.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -16,6 +18,23 @@ public class GlobalExceptionHandler {
         Map<String, String> error = new HashMap<>();
         error.put("message", ex.getMessage());
 
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException (MethodArgumentNotValidException ex){
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error
+                -> errors.put(error.getField(), error.getDefaultMessage()));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleJsonParseException(HttpMessageNotReadableException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", "Invalid input format. Please check field values (e.g., priority must be HIGH, MEDIUM, or LOW).");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 }
