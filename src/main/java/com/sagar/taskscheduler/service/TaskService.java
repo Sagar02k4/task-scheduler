@@ -85,7 +85,7 @@ public class TaskService {
         sortedOrder.add(task);
     }
 
-    public List<Task> getPriorityBasedRxrcutionOrder() {
+    public List<Task> getPriorityBasedExecutionOrder() {
         List<Task> allTasks = taskRepository.findAll();
 
         Map<Long, Integer> inDegree = new HashMap<>();

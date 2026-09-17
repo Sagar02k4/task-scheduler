@@ -48,7 +48,7 @@ public class TaskController {
 
     @GetMapping("/priority-execution-order")
     public List<Task> getPriorityBasedExecutionOrder(){
-        return taskService.getPriorityBasedRxrcutionOrder();
+        return taskService.getPriorityBasedExecutionOrder();
     }
 
 
