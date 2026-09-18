@@ -1,5 +1,6 @@
 package com.sagar.taskscheduler.controller;
 
+import com.sagar.taskscheduler.dto.TaskRequest;
 import com.sagar.taskscheduler.model.Status;
 import com.sagar.taskscheduler.model.Task;
 import com.sagar.taskscheduler.service.TaskService;
@@ -17,7 +18,15 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping
-    public Task createTask(@Valid @RequestBody Task task) {
+    public Task createTask(@Valid @RequestBody TaskRequest request) {
+        Task task = new Task();
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setPriority(request.getPriority());
+        task.setStatus(request.getStatus() != null ? request.getStatus() : Status.TODO);
+        task.setDeadline(request.getDeadline());
+        task.setAssignee(request.getAssignee());
+
         return taskService.createTask(task);
     }
 
