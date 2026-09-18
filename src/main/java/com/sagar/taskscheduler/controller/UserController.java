@@ -1,5 +1,6 @@
 package com.sagar.taskscheduler.controller;
 
+import com.sagar.taskscheduler.dto.AuthRequest;
 import com.sagar.taskscheduler.model.User;
 import com.sagar.taskscheduler.service.UserService;
 import com.sagar.taskscheduler.util.JwtUtil;
@@ -19,20 +20,14 @@ public class UserController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public User register(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String password = request.get("password");
-        return userService.registerUser(username, password);
+    public User register(@RequestBody AuthRequest request) {
+        return userService.registerUser(request.getUsername(), request.getPassword());
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String password = request.get("password");
-
-        User user = userService.validateUser(username, password);
+    public Map<String, String> login(@RequestBody AuthRequest request) {
+        User user = userService.validateUser(request.getUsername(), request.getPassword());
         String token = jwtUtil.generateToken(user.getUsername());
-
         return Map.of("token", token);
     }
 }
