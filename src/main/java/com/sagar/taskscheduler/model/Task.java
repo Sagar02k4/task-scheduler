@@ -46,4 +46,8 @@ public class Task {
         inverseJoinColumns = @JoinColumn(name = "depends_on_id")
     )
     private List<Task> dependencies = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
 }

@@ -1,9 +1,12 @@
 package com.sagar.taskscheduler.service;
 
 import com.sagar.taskscheduler.model.Status;
+import com.sagar.taskscheduler.model.User;
 import com.sagar.taskscheduler.repository.TaskRepository;
 import com.sagar.taskscheduler.model.Task;
+import com.sagar.taskscheduler.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -14,20 +17,32 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public Task createTask(Task task){
+        String username = getCurrentusername();
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        task.setOwner(owner);
         return taskRepository.save(task);
     }
 
     public List<Task> getAllTasks(){
-        return taskRepository.findAll();
+        String username = getCurrentusername();
+        return taskRepository.findByOwnerUsername(username);
     }
 
     public Task getTaskById(Long Id){
-        return taskRepository.findById(Id)
+        Task task = taskRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Cannot find Task by this Id"));
+
+        checkOwnership(task);
+        return task;
     }
 
     public void deleteTask(Long Id){
+        Task task = getTaskById(Id);
         taskRepository.deleteById(Id);
     }
 
@@ -60,7 +75,8 @@ public class TaskService {
     }
 
     public List<Task> getExecutionOrder(){
-        List<Task> allTasks = taskRepository.findAll();
+        String username = getCurrentusername();
+        List<Task> allTasks = taskRepository.findByOwnerUsername(username);
         List<Task> sortedOrder = new ArrayList<>();
         Set<Long> visited = new HashSet<>();
 
@@ -86,7 +102,8 @@ public class TaskService {
     }
 
     public List<Task> getPriorityBasedExecutionOrder() {
-        List<Task> allTasks = taskRepository.findAll();
+        String username = getCurrentusername();
+        List<Task> allTasks = taskRepository.findByOwnerUsername(username);
 
         Map<Long, Integer> inDegree = new HashMap<>();
         Map<Long, List<Task>> dependents = new HashMap<>();
@@ -129,7 +146,8 @@ public class TaskService {
     }
 
     public List<String> detectDeadlineConflict(){
-        List<Task> alltasks = taskRepository.findAll();
+        String username = getCurrentusername();
+        List<Task> alltasks = taskRepository.findByOwnerUsername(username);
         List<String> conflicts = new ArrayList<>();
         Map<String, List<Task>> tasksbyAssigneeAndDate = new HashMap<>();
 
@@ -177,6 +195,18 @@ public class TaskService {
 
         task.setStatus(newStatus);
         return taskRepository.save(task);
+    }
+
+    private String getCurrentusername(){
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    private void checkOwnership(Task task){
+        String username = getCurrentusername();
+        if(!task.getOwner().getUsername().equals(username)){
+            throw new RuntimeException("You don't have access to this task");
+        }
+
     }
 
 }
