@@ -6,6 +6,9 @@ import com.sagar.taskscheduler.repository.TaskRepository;
 import com.sagar.taskscheduler.model.Task;
 import com.sagar.taskscheduler.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +34,12 @@ public class TaskService {
     public List<Task> getAllTasks(){
         String username = getCurrentusername();
         return taskRepository.findByOwnerUsername(username);
+    }
+
+    public Page<Task> getAllTasksPaginated(int page, int size) {
+        String username = getCurrentusername();
+        Pageable pageable = PageRequest.of(page, size);
+        return taskRepository.findByOwnerUsername(username, pageable);
     }
 
     public Task getTaskById(Long Id){

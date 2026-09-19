@@ -6,6 +6,7 @@ import com.sagar.taskscheduler.model.Task;
 import com.sagar.taskscheduler.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,8 +32,10 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public Page<Task> getAllTasks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return taskService.getAllTasksPaginated(page, size);
     }
 
     @GetMapping("/{id}")
